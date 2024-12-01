@@ -77,6 +77,34 @@ An app that tracks niche statistics that aren't found on the official NHL app, f
 
 ## Wireframes
 
-<img src="https://github.com/Squekky/niche-nhl/blob/main/NicheNHLWireframeSketch.jpg" width=600>
+<img src="https://github.com/Squekky/niche-nhl/blob/main/docs/milestone1/NicheNHLWireframeSketch.jpg" width=600>
+
+<br>
+
+# Milestone 2 - Build Sprint 1 (Unit 8)
+
+## GitHub Project board
+
+<img src="https://github.com/Squekky/niche-nhl/blob/main/docs/milestone2/projectBoard.png" width=600>
+<img src="https://github.com/Squekky/niche-nhl/blob/main/docs/milestone2/milestones.png" width=600>
+
+## Issue cards
+
+This sprint:
+
+<img src="https://github.com/Squekky/niche-nhl/blob/main/docs/milestone2/currentSprint.png" width=600>
+
+Next sprint:
+
+<img src="https://github.com/Squekky/niche-nhl/blob/main/docs/milestone2/nextSprint.png" width=600>
+
+## Issues worked on this sprint
+
+- Created 3 screens: Home, Settings, Stats
+  - Home, Settings can be navigated to using the bottom navigation menu
+  - Stats can be navigated to by selecting a statistic from the search menu on the Home screen
+- <img src='https://github.com/Squekky/niche-nhl/blob/main/docs/milestone2/milestone2Walkthrough.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+
+<br>
 
 *Note: features are likely to be added during the creation. this is not final*
