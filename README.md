@@ -37,7 +37,7 @@ An app that tracks niche statistics that aren't found on the official NHL app, f
 **Required Features**
 
 1. Create 3 screens (home, stats, settings) which the user can navigate between
-2. Use the (NHL API)[https://api-web.nhle.com/] to fetch data and calculate statistics
+2. Use the [NHL API](https://api-web.nhle.com/) to fetch data and calculate statistics
 3. Search feature where users can search through niche statistics and select one to view
 4. Use Room to store data that is fetched to persist on the user's device until it is updated
 
