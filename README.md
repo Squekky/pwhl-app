@@ -101,7 +101,7 @@ Next sprint:
 - Created 3 screens: Home, Settings, Stats
   - Home, Settings can be navigated to using the bottom navigation menu
   - Stats can be navigated to by selecting a statistic from the search menu on the Home screen
-- <img src='https://github.com/Squekky/niche-nhl/blob/main/docs/milestone2/milestone2Walkthrough.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+- <img src='https://github.com/Squekky/niche-nhl/blob/main/docs/milestone2/milestone2Walkthrough.gif' title='Milestone 3 Walkthrough' width='' alt='Video Walkthrough' />
 
 <br>
 
@@ -109,7 +109,6 @@ Next sprint:
 
 ## GitHub Project board
 
-[Add screenshot of your Project Board with the updated status of issues for Milestone 3]
 <img src="https://github.com/Squekky/pwhl-app/blob/main/docs/milestone3/projectBoard.png" width=600>
 
 <img src="https://github.com/Squekky/pwhl-app/blob/main/docs/milestone3/milestone3.png" width=600>
@@ -121,7 +120,7 @@ Next sprint:
   - Decided not to use Room to store user data such as their favorite team, since using SharedPreferences was easier
 - Created an option to enable push notifications for their favorite team
   - Needs to be fixed in some regards, but it does the job. The Intent to ask for permissions gets stuck on the screen until you restart the app, and it continues to notify you if you open the settings page within the 15 minutes before a game starts
-- <img src='https://github.com/Squekky/niche-nhl/blob/main/docs/milestone3/milestone3Walkthrough.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+- <img src='https://github.com/Squekky/niche-nhl/blob/main/docs/milestone3/milestone3Walkthrough.gif' title='Milestone 3 Walkthrough' width='' alt='Video Walkthrough' />
 
 ## App Demo Video
 
