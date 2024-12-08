@@ -1,7 +1,13 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
 }
+
+val apikeyPropertiesFile = rootProject.file("apikey.properties")
+val apikeyProperties = Properties()
+apikeyProperties.load(apikeyPropertiesFile.inputStream())
 
 android {
     namespace = "com.example.nichenhl"
@@ -15,6 +21,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "API_KEY", "\"${apikeyProperties["API_KEY"]}\"")
+        android.buildFeatures.buildConfig = true
 
         buildFeatures {
             viewBinding = true

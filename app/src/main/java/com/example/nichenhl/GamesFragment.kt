@@ -12,14 +12,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.codepath.asynchttpclient.AsyncHttpClient
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler
 import okhttp3.Headers
-import org.json.JSONArray
 import org.json.JSONException
-import org.json.JSONObject
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -28,6 +24,8 @@ import java.util.Locale
 import java.util.TimeZone
 
 private const val TAG = "GamesFragment"
+private const val API_KEY = BuildConfig.API_KEY
+private const val GAMES_SEARCH = "https://api.sportradar.com/icehockey/trial/v2/en/seasons/sr%3Aseason%3A122567/summaries.json?api_key=${API_KEY}"
 
 private val client = AsyncHttpClient()
 
@@ -78,9 +76,8 @@ class GamesFragment : Fragment() {
     private fun fetchGamesFromApi() {
         progressBar.visibility = View.VISIBLE
         Log.d(TAG, "fetchGamesFromApi called")
-        val url = "https://api.sportradar.com/icehockey/trial/v2/en/seasons/sr%3Aseason%3A122567/summaries.json?api_key=wrogXgmj7FXIpTpumcjgQALmEK8Ay382hJz7wyhJ"
 
-        client.get(url, object : JsonHttpResponseHandler() {
+        client.get(GAMES_SEARCH, object : JsonHttpResponseHandler() {
             override fun onFailure(
                 statusCode: Int,
                 headers: Headers?,
