@@ -42,9 +42,8 @@ A mobile app that allows users to follow the Professional Women's Hockey League 
 **Optional Features**
 
 1. Option to enable push notifications for their favorite team
-2. Enable users to favorite certain statistics for easy access
-3. Expansive standings page, allowing users to select individual teams and see more details
-4. Stylize the application using different themes for light and dark mode
+2. Expansive standings page, allowing users to select individual teams and see more details
+3. Stylize the application using different themes for light and dark mode
 
 ### 2. Screen Archetypes
 
