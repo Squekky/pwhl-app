@@ -22,6 +22,9 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private const val TAG = "GamesFragment"
 private const val API_KEY = BuildConfig.API_KEY
@@ -34,7 +37,8 @@ class GamesFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var dateTextView: TextView
-    private var games: List<Game> = emptyList()
+    private lateinit var database: AppDatabase
+    private var games: MutableList<Game> = mutableListOf()
     private var currentDate: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
     override fun onCreateView(
@@ -52,6 +56,7 @@ class GamesFragment : Fragment() {
         recyclerView.adapter = adapter
 
         fetchGamesFromApi()
+        recyclerView.visibility = View.VISIBLE
 
         dateTextView = view.findViewById(R.id.dateTextView)
 
@@ -71,12 +76,15 @@ class GamesFragment : Fragment() {
         }
 
         dateTextView.text = currentDate
+
+        database = AppDatabase.getInstance(requireContext())
+
         return view
     }
 
     private fun fetchGamesFromApi() {
-        progressBar.visibility = View.VISIBLE
         Log.d(TAG, "fetchGamesFromApi called")
+        progressBar.visibility = View.VISIBLE
 
         client.get(GAMES_SEARCH, object : JsonHttpResponseHandler() {
             override fun onFailure(
@@ -92,9 +100,7 @@ class GamesFragment : Fragment() {
 
             override fun onSuccess(statusCode: Int, headers: Headers?, json: JSON?) {
                 try {
-
                     val summaries = json?.jsonObject?.getJSONArray("summaries")
-                    val games = mutableListOf<Game>()
 
                     if (summaries != null) {
                         for (i in 0 until summaries.length()) {
@@ -121,22 +127,30 @@ class GamesFragment : Fragment() {
 
                             try {
                                 // Parse the start time with timezone offset
-                                val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
+                                val format = SimpleDateFormat(
+                                    "yyyy-MM-dd'T'HH:mm:ssXXX",
+                                    Locale.getDefault()
+                                )
                                 format.timeZone = TimeZone.getTimeZone("UTC")
                                 val parsedStartTime = format.parse(startTime)
 
                                 if (parsedStartTime != null) {
-                                    // Subtract 7 hours
+                                    // Convert time to EST
                                     val calendar = Calendar.getInstance()
                                     calendar.time = parsedStartTime
                                     calendar.add(Calendar.HOUR, -5)
 
                                     // Format the adjusted time back to string
-                                    val adjustedStartTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+                                    val adjustedStartTime = SimpleDateFormat(
+                                        "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                                        Locale.getDefault()
+                                    )
                                     adjustedStartTime.timeZone = TimeZone.getTimeZone("UTC")
-                                    val adjustedStartTimeStr = adjustedStartTime.format(calendar.time)
+                                    val adjustedStartTimeStr =
+                                        adjustedStartTime.format(calendar.time)
 
-                                    val sportEventStatus = summary.getJSONObject("sport_event_status")
+                                    val sportEventStatus =
+                                        summary.getJSONObject("sport_event_status")
                                     val matchStatus = sportEventStatus.getString("match_status")
 
                                     if (matchStatus == "ended") {
@@ -144,7 +158,6 @@ class GamesFragment : Fragment() {
                                         awayScore = sportEventStatus.getInt("away_score")
                                     }
 
-                                    // Create the Game object with adjusted start time
                                     val game = Game(
                                         id = id,
                                         startTime = adjustedStartTimeStr,
@@ -153,7 +166,28 @@ class GamesFragment : Fragment() {
                                         awayScore = awayScore,
                                         homeScore = homeScore
                                     )
+
                                     games.add(game)
+                                    updateGamesList(games)
+                                    lifecycleScope.launch(Dispatchers.IO) {
+                                        val existingGame = database.gameDao().getGameById(id)
+                                        if (existingGame == null) {
+                                            // If the game does not exist, create and add to the list
+
+                                            val gameEntity = GameEntity(
+                                                id = id,
+                                                homeTeam = homeTeam,
+                                                awayTeam = awayTeam,
+                                                startTime = startTime
+                                            )
+
+                                            // Insert the game into the database
+                                            database.gameDao().insert(gameEntity)
+                                            Log.d(TAG, "Inserting: ${gameEntity}")
+                                        } else {
+                                            Log.d(TAG, "Game already exists in the database: $id")
+                                        }
+                                    }
                                 } else {
                                     println("Invalid start time format for game ID $id: $startTime")
                                 }
@@ -162,17 +196,21 @@ class GamesFragment : Fragment() {
                             }
                         }
                     }
-                    this@GamesFragment.games = games
                     updateGamesList(getGamesForDate(this@GamesFragment.games, currentDate))
+                    progressBar.visibility = View.GONE
+                    Log.d(TAG, "Fetched games: ${games.size}")
                 } catch (e: JSONException) {
                     Log.e(TAG, "Failed to parse games: ${e.localizedMessage}")
                 }
-                progressBar.visibility = View.GONE
-                recyclerView.visibility = View.VISIBLE
             }
 
         })
+    }
 
+    override fun onResume() {
+        super.onResume()
+        games.clear()
+        updateGamesList(getGamesForDate(this@GamesFragment.games, currentDate))
     }
 
     private fun getGamesForDate(games: List<Game>, selectedDate: String): List<Game> {

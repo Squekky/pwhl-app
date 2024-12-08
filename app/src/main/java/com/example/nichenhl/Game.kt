@@ -1,5 +1,9 @@
 package com.example.nichenhl
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Game(
     val id: String,
     val startTime: String,
@@ -7,5 +11,9 @@ data class Game(
     val awayTeam: String,
     val awayScore: Int = 0,
     val homeScore: Int = 0
-)
+): Parcelable
 
+data class Team(
+    val name: String,
+    val logoResId: Int
+)

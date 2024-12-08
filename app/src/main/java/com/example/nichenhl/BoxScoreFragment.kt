@@ -6,24 +6,17 @@ import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import android.util.Log
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import com.bumptech.glide.Glide
 import com.codepath.asynchttpclient.AsyncHttpClient
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler
 import okhttp3.Headers
 import org.json.JSONException
-import org.json.JSONObject
-import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Locale
-import java.util.TimeZone
 
 private const val TAG = "BoxScoreFragment"
 private const val API_KEY = BuildConfig.API_KEY
@@ -82,11 +75,9 @@ class BoxScoreFragment : Fragment(R.layout.fragment_box_score) {
                 try {
                     if (json != null) {
                         Log.d(TAG, "json: $json")
-                        // Now directly work with the JSONObject received in 'json'
-                        val jsonObject = json.jsonObject  // This is the response already parsed into a JSONObject
+                        val jsonObject = json.jsonObject
                         Log.d(TAG, "jsonObject: $jsonObject")
 
-                        // Extract sport event and event status
                         val sportEvent = jsonObject.getJSONObject("sport_event")
                         val sportEventStatus = jsonObject.getJSONObject("sport_event_status")
 
@@ -156,16 +147,8 @@ class BoxScoreFragment : Fragment(R.layout.fragment_box_score) {
                             }
                         }
 
-                        // Load team logos using Glide
-                        requireActivity().runOnUiThread {
-                            Glide.with(view.context)
-                                .load(getTeamLogoResource(awayTeamName))
-                                .into(awayTeamLogo)
-
-                            Glide.with(view.context)
-                                .load(getTeamLogoResource(homeTeamName))
-                                .into(homeTeamLogo)
-                        }
+                        awayTeamLogo.setImageResource(getTeamLogoResource(awayTeamName))
+                        homeTeamLogo.setImageResource(getTeamLogoResource(homeTeamName))
                     }
                 } catch (e: JSONException) {
                     Log.e(TAG, "Error parsing game data: $e")
@@ -186,7 +169,7 @@ class BoxScoreFragment : Fragment(R.layout.fragment_box_score) {
             "New York Sirens" -> R.drawable.newyorksirens
             "Ottawa Charge" -> R.drawable.ottawacharge
             "Toronto Sceptres" -> R.drawable.torontosceptres
-            else -> R.drawable.baseline_sports_hockey_24 // Default logo if no match is found
+            else -> R.drawable.baseline_sports_hockey_24
         }
     }
 
