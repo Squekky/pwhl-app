@@ -9,7 +9,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -29,7 +28,6 @@ class GameAdapter(private var games: List<Game>, private val fragmentManager: Fr
         notifyDataSetChanged()
     }
 
-
     override fun getItemCount(): Int = games.size
 }
 
@@ -46,19 +44,13 @@ class GameViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         awayTeamTextView.text = game.awayTeam
         homeTeamTextView.text = game.homeTeam
 
-        Glide.with(itemView.context)
-            .load(getTeamLogoResource(game.awayTeam))
-            .into(awayTeamLogoImage)
+        awayTeamLogoImage.setImageResource(getTeamLogoResource(game.awayTeam))
+        homeTeamLogoImage.setImageResource(getTeamLogoResource(game.homeTeam))
 
-        Glide.with(itemView.context)
-            .load(getTeamLogoResource(game.homeTeam))
-            .into(homeTeamLogoImage)
-
-        // Current time in milliseconds
         val currentTime = System.currentTimeMillis()
         Log.d("GameAdapter", "Current time: $currentTime")
 
-        // Parse the game start time, handle timezone if necessary
+        // Parse the game start time
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         val gameStartTimeMillis = try {
             format.parse(game.startTime)?.time ?: 0L
@@ -70,15 +62,14 @@ class GameViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         Log.d("GameAdapter", "Game start time (in millis): $gameStartTimeMillis")
 
         if (gameStartTimeMillis > currentTime) {
-            // Game is in the future - show the start time
+            // Show the start time if the game is in the future
             gameStartTimeTextView.text = formatTime(game.startTime)
             awayScoreTextView.visibility = View.GONE
             homeScoreTextView.visibility = View.GONE
             gameStartTimeTextView.visibility = View.VISIBLE
             Log.d("GameAdapter", "Game is in the future, showing start time: ${game.startTime}")
         } else {
-            // Game is over - show the scores
-            gameStartTimeTextView.text = "Game Over"
+            // Show scores if the game is over
             awayScoreTextView.visibility = View.VISIBLE
             homeScoreTextView.visibility = View.VISIBLE
 
@@ -100,8 +91,8 @@ class GameViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private fun openBoxScoreFragment(game: Game, fragmentManager: FragmentManager) {
         val boxScoreFragment = BoxScoreFragment.newInstance(game.id)
         val transaction = fragmentManager.beginTransaction()
-        transaction.replace(R.id.pwhl_frame_layout, boxScoreFragment) // Replace the container with the BoxScoreFragment
-        transaction.addToBackStack(null) // Allows navigation back to previous fragment
+        transaction.replace(R.id.pwhl_frame_layout, boxScoreFragment)
+        transaction.addToBackStack(null)
         transaction.commit()
     }
 
@@ -113,7 +104,7 @@ class GameViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             "New York Sirens" -> R.drawable.newyorksirens
             "Ottawa Charge" -> R.drawable.ottawacharge
             "Toronto Sceptres" -> R.drawable.torontosceptres
-            else -> R.drawable.baseline_sports_hockey_24 // Default logo if no match is found
+            else -> R.drawable.baseline_sports_hockey_24
         }
     }
 
@@ -121,7 +112,7 @@ class GameViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Parse and format the start time to display as needed
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         val date = format.parse(startTime)
-        val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault()) // For 12-hour format
+        val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
         val formattedTime = timeFormat.format(date)
         Log.d("GameAdapter", "Formatted start time: $formattedTime")
         return formattedTime
