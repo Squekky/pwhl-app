@@ -1,4 +1,4 @@
-# Milestone 1 - Niche NHL (Unit 7)
+# Milestone 1 - PWHL (Unit 7)
 
 ## Table of Contents
 
@@ -10,7 +10,7 @@
 
 ### Description
 
-An app that tracks niche statistics that aren't found on the official NHL app, for hockey nerds like myself. Allows users to change settings to view statistics for certain teams or to enable push notifications for statistics that occur rarely.
+A mobile app that allows users to follow the Professional Women's Hockey League (PWHL). It contains past and future games with detailed box scores, league standings, and settings where users can choose a favorite team to follow.
 
 ### App Evaluation
 
@@ -49,31 +49,31 @@ An app that tracks niche statistics that aren't found on the official NHL app, f
 
 ### 2. Screen Archetypes
 
-- Home Page
-  - Displays a screen where the user can search for statistics
-  - User can star/favorite certain statistics
-- Statistics Page
-  - User can view the statistic that they searched for
-  - User can adjust settings regarding the statistic (e.g., duration, games played)
+- Games Page
+  - Displays a page of games on a given day (default is today)
+  - User move forward or backward in time and view past or future games
+- Standings Page
+  - User can view the current league standings, with their favorite team highlighted if they chose one
+- Box Score Page
+  - User can view the box score of any completed (or potentially ongoing) game
 - Settings
-  - User can enable post notifications
-  - User can select a favorite team, highlighting instances of them in future statistics
+  - User can select a favorite team to be highlighted in other areas of the app
+  - User can enable notifications to be notified when games with their favorite team are about to begin
 
 ### 3. Navigation
 
 **Tab Navigation** (Tab to Screen)
 
 * Home
+* Standings
 * Settings
 
 **Flow Navigation** (Screen to Screen)
 
 - Home
-  - => Statistics
-- Statistics
+  - => Box Score
+- Box Score
   - => Home
-- Settings
-  - => None
 
 ## Wireframes
 
