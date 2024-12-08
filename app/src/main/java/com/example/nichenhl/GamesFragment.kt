@@ -46,8 +46,9 @@ class GamesFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
 
         recyclerView = view.findViewById(R.id.gamesRecyclerView)
+        recyclerView.visibility = View.GONE
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        adapter = GameAdapter(emptyList())
+        adapter = GameAdapter(games, requireActivity().supportFragmentManager)
         recyclerView.adapter = adapter
 
         fetchGamesFromApi()
@@ -91,6 +92,7 @@ class GamesFragment : Fragment() {
 
             override fun onSuccess(statusCode: Int, headers: Headers?, json: JSON?) {
                 try {
+
                     val summaries = json?.jsonObject?.getJSONArray("summaries")
                     val games = mutableListOf<Game>()
 
@@ -166,8 +168,11 @@ class GamesFragment : Fragment() {
                     Log.e(TAG, "Failed to parse games: ${e.localizedMessage}")
                 }
                 progressBar.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
             }
+
         })
+
     }
 
     private fun getGamesForDate(games: List<Game>, selectedDate: String): List<Game> {

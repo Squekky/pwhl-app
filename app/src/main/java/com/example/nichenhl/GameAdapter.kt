@@ -7,12 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class GameAdapter(private var games: List<Game>) : RecyclerView.Adapter<GameViewHolder>() {
+class GameAdapter(private var games: List<Game>, private val fragmentManager: FragmentManager) : RecyclerView.Adapter<GameViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GameViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_game, parent, false)
         return GameViewHolder(view)
@@ -20,7 +21,7 @@ class GameAdapter(private var games: List<Game>) : RecyclerView.Adapter<GameView
 
     override fun onBindViewHolder(holder: GameViewHolder, position: Int) {
         val game = games[position]
-        holder.bind(game)
+        holder.bind(game, fragmentManager)
     }
 
     fun updateGames(newGames: List<Game>) {
@@ -41,7 +42,7 @@ class GameViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val awayScoreTextView: TextView = itemView.findViewById(R.id.awayScore)
     private val homeScoreTextView: TextView = itemView.findViewById(R.id.homeScore)
 
-    fun bind(game: Game) {
+    fun bind(game: Game, fragmentManager: FragmentManager) {
         awayTeamTextView.text = game.awayTeam
         homeTeamTextView.text = game.homeTeam
 
@@ -91,6 +92,17 @@ class GameViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             gameStartTimeTextView.visibility = View.GONE // Hide the start time when the game is over
             Log.d("GameAdapter", "Game is over, showing scores: Away: ${game.awayScore}, Home: ${game.homeScore}")
         }
+        itemView.setOnClickListener {
+            openBoxScoreFragment(game, fragmentManager)
+        }
+    }
+
+    private fun openBoxScoreFragment(game: Game, fragmentManager: FragmentManager) {
+        val boxScoreFragment = BoxScoreFragment.newInstance(game.id)
+        val transaction = fragmentManager.beginTransaction()
+        transaction.replace(R.id.pwhl_frame_layout, boxScoreFragment) // Replace the container with the BoxScoreFragment
+        transaction.addToBackStack(null) // Allows navigation back to previous fragment
+        transaction.commit()
     }
 
     private fun getTeamLogoResource(teamName: String): Int {
