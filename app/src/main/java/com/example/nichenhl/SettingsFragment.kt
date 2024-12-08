@@ -179,10 +179,10 @@ class SettingsFragment : Fragment() {
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
 
         val gameTime = format.parse(gameStartTime)
-        if (gameTime != null && gameTime.after(Date())) {
+        if (gameTime != null) {
             // Schedule the notification 15 minutes before the game
             calendar.time = gameTime
-            calendar.add(Calendar.MINUTE, -15)
+            calendar.add(Calendar.MINUTE, +43)
 
             val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(requireContext(), NotificationReceiver::class.java).apply {
