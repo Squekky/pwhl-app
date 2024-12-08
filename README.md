@@ -1,4 +1,4 @@
-# Milestone 1 - Niche NHL (Unit 7)
+# Milestone 1 - PWHL (Unit 7)
 
 ## Table of Contents
 
@@ -10,25 +10,22 @@
 
 ### Description
 
-An app that tracks niche statistics that aren't found on the official NHL app, for hockey nerds like myself. Allows users to change settings to view statistics for certain teams or to enable push notifications for statistics that occur rarely.
+A mobile app that allows users to follow the Professional Women's Hockey League (PWHL). It contains past and future games with detailed box scores, league standings, and settings where users can choose a favorite team to follow.
 
 ### App Evaluation
 
 - **Category:** Entertainment
 - **Mobile:** How uniquely mobile is the product experience?
-   - Would implement the option to enable push notifications for rare statistics
-   - Could try and have a feature to search for statistics only including players born within a certain radius on a map
+   - The PWHL currently does not have an official app for easy viewing
 - **Story:** How compelling is the story around this app once completed?
-   - For individuals such as myself who find value in these niche statistics, I believe it would be a very valuable resource
+   For individuals who follow hockey, and the PWHL in general, this would be a great resource considering there does not exist an official app yet
 - **Market:** How large or unique is the market for this app?
-   - The NHL is the highest level of professional hockey, with millions of fans worldwide
-   - I have noticed the interest in hockey statistics and data increase over the past several years
+   - The PWHL is the newest iteration of the highest level of women's hockey, with thousands of fans nationwide and worldwide
 - **Habit:** How habit-forming or addictive is this app?
-   - Users might use the app daily to check updated statistics
-   - Difficult to have a way for users to create things
+   - Users might use the app daily to check scores and standings
+   - Regular notifications for a user's selected favorite team to keep them engaged
 - **Scope:** How well-formed is the scope for this app?
-   - The NHL API is straightforward to use, and I have experience with it in the past
-   - I have already made very stripped-down versions of this app and have still enjoyed them
+   - The PWHL API that I found is straightforward to use, the only struggle might be gathering real-time data during ongoing games
 
 ## Product Spec
 
@@ -36,44 +33,45 @@ An app that tracks niche statistics that aren't found on the official NHL app, f
 
 **Required Features**
 
-1. Create 3 screens (home, stats, settings) which the user can navigate between
-2. Use the [NHL API](https://api-web.nhle.com/) to fetch data and calculate statistics
-3. Search feature where users can search through niche statistics and select one to view
-4. Use Room to store data that is fetched to persist on the user's device until it is updated
+1. Create 3 screens (home, standings, settings) that the user can navigate between
+2. Use the [SportsRadar Global Ice Hockey API](https://developer.sportradar.com/ice-hockey/reference/global-ice-hockey-overview) to fetch data
+3. Create a box score screen that can be reached through interacting with a completed (or ongoing) game, providing detailed statistics for that game
+4. Utilize the SportsRadar API to provide real-time scoring updates for ongoing games
+5. Use Room to store user data, such as their chosen favorite team
 
 **Optional Features**
 
-1. Option to enable push notifications for certain statistics
-2. Ability to view statistics between individuals from a specified radius on a map
-3. Enable users to favorite certain statistics for easy access
+1. Option to enable push notifications for their favorite team
+2. Expansive standings page, allowing users to select individual teams and see more details
+3. Stylize the application using different themes for light and dark mode
 
 ### 2. Screen Archetypes
 
-- Home Page
-  - Displays a screen where the user can search for statistics
-  - User can star/favorite certain statistics
-- Statistics Page
-  - User can view the statistic that they searched for
-  - User can adjust settings regarding the statistic (e.g., duration, games played)
+- Games Page
+  - Displays a page of games on a given day (default is today)
+  - User move forward or backward in time and view past or future games
+- Standings Page
+  - User can view the current league standings, with their favorite team highlighted if they chose one
+- Box Score Page
+  - User can view the box score of any completed (or potentially ongoing) game
 - Settings
-  - User can enable post notifications
-  - User can select a favorite team, highlighting instances of them in future statistics
+  - User can select a favorite team to be highlighted in other areas of the app
+  - User can enable notifications to be notified when games with their favorite team are about to begin
 
 ### 3. Navigation
 
 **Tab Navigation** (Tab to Screen)
 
 * Home
+* Standings
 * Settings
 
 **Flow Navigation** (Screen to Screen)
 
 - Home
-  - => Statistics
-- Statistics
+  - => Box Score
+- Box Score
   - => Home
-- Settings
-  - => None
 
 ## Wireframes
 

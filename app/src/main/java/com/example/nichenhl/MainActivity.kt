@@ -18,7 +18,8 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        val homeFragment: Fragment = HomeFragment()
+        val gamesFragment: Fragment = GamesFragment()
+        val standingsFragment: Fragment = StandingsFragment()
         val settingsFragment: Fragment = SettingsFragment()
 
         val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottomNavigationView)
@@ -26,9 +27,10 @@ class MainActivity : AppCompatActivity() {
         // Handle navigation selection
         bottomNavigationView.setOnItemSelectedListener { item ->
             val fragment = when (item.itemId) {
-                R.id.nav_home -> homeFragment
+                R.id.nav_home -> gamesFragment
+                R.id.nav_standings -> standingsFragment
                 R.id.nav_settings -> settingsFragment
-                else -> homeFragment
+                else -> gamesFragment
             }
             replaceFragment(fragment, item.itemId)
             true
@@ -45,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 
         supportFragmentManager.addOnBackStackChangedListener {
             val fragment = supportFragmentManager.findFragmentById(R.id.nhl_frame_layout)
-            if (fragment is HomeFragment) {
+            if (fragment is GamesFragment) {
                 binding.bottomNavigationView.selectedItemId = R.id.nav_home
             } else if (fragment is SettingsFragment) {
                 binding.bottomNavigationView.selectedItemId = R.id.nav_settings
