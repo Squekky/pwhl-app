@@ -5,26 +5,18 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    tools:context=".HomeFragment">
+    tools:context=".StandingsFragment">
 
     <TextView
         android:id="@+id/homeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome to Niche NHL"
+        android:text="PWHL Standings"
         android:textSize="30sp"
         android:layout_marginTop="50dp" />
 
-    <SearchView
-        android:id="@+id/searchStats"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginHorizontal="50dp"
-        android:queryHint="search nhl statistics"/>
-
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/statsListRecyclerView"
+        android:id="@+id/standingsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
