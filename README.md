@@ -33,10 +33,11 @@ A mobile app that allows users to follow the Professional Women's Hockey League 
 
 **Required Features**
 
-1. Create 4 screens (home, box score, standings, settings) that the user can navigate between
+1. Create 3 screens (home, standings, settings) that the user can navigate between
 2. Use the [SportsRadar Global Ice Hockey API](https://developer.sportradar.com/ice-hockey/reference/global-ice-hockey-overview) to fetch data
-3. Utilize the SportsRadar API to provide real-time scoring updates for ongoing games
-4. Use Room to store user data, such as their chosen favorite team
+3. Create a box score screen that can be reached through interacting with a completed (or ongoing) game, providing detailed statistics for that game
+4. Utilize the SportsRadar API to provide real-time scoring updates for ongoing games
+5. Use Room to store user data, such as their chosen favorite team
 
 **Optional Features**
 
