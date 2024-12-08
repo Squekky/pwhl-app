@@ -110,9 +110,9 @@ Next sprint:
 ## GitHub Project board
 
 [Add screenshot of your Project Board with the updated status of issues for Milestone 3]
-<img src="PROJECT_BOARD" width=600>
+<img src="https://github.com/Squekky/pwhl-app/blob/main/docs/milestone3/projectBoard.png" width=600>
 
-<img src="MILESTONE_3" width=600>
+<img src="https://github.com/Squekky/pwhl-app/blob/main/docs/milestone3/milestone3.png" width=600>
 
 ## Completed user stories
 
