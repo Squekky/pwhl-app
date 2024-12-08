@@ -105,4 +105,26 @@ Next sprint:
 
 <br>
 
-*Note: features are likely to be added during the creation. this is not final*
+# Milestone 3 - Build Sprint 2 (Unit 9)
+
+## GitHub Project board
+
+[Add screenshot of your Project Board with the updated status of issues for Milestone 3]
+<img src="PROJECT_BOARD" width=600>
+
+<img src="MILESTONE_3" width=600>
+
+## Completed user stories
+
+- Created a box score screen that can be reached through interacting with a completed (or ongoing) game, providing detailed statistics for that game
+- Used Room to store team data for notifications
+  - Decided not to use Room to store user data such as their favorite team, since using SharedPreferences was easier
+- Created an option to enable push notifications for their favorite team
+  - Needs to be fixed in some regards, but it does the job. The Intent to ask for permissions gets stuck on the screen until you restart the app, and it continues to notify you if you open the settings page within the 15 minutes before a game starts
+
+[Add video/gif of your current application that shows build progress]
+<img src="PROGRESS_VIDEO" width=600>
+
+## App Demo Video
+
+- Embed the YouTube/Vimeo link of your Completed Demo Day prep video
