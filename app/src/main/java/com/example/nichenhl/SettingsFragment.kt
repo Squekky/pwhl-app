@@ -179,7 +179,7 @@ class SettingsFragment : Fragment() {
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
 
         val gameTime = format.parse(gameStartTime)
-        if (gameTime != null) {
+        if (gameTime != null && gameTime.after(calendar.time)) {
             // Schedule the notification 15 minutes before the game
             calendar.time = gameTime
             calendar.add(Calendar.MINUTE, -15)
