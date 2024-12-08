@@ -121,9 +121,7 @@ Next sprint:
   - Decided not to use Room to store user data such as their favorite team, since using SharedPreferences was easier
 - Created an option to enable push notifications for their favorite team
   - Needs to be fixed in some regards, but it does the job. The Intent to ask for permissions gets stuck on the screen until you restart the app, and it continues to notify you if you open the settings page within the 15 minutes before a game starts
-
-[Add video/gif of your current application that shows build progress]
-<img src="PROGRESS_VIDEO" width=600>
+- <img src='https://github.com/Squekky/niche-nhl/blob/main/docs/milestone3/milestone3Walkthrough.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 ## App Demo Video
 
