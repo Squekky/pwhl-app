@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         supportFragmentManager.addOnBackStackChangedListener {
-            val fragment = supportFragmentManager.findFragmentById(R.id.nhl_frame_layout)
+            val fragment = supportFragmentManager.findFragmentById(R.id.pwhl_frame_layout)
             if (fragment is GamesFragment) {
                 binding.bottomNavigationView.selectedItemId = R.id.nav_home
             } else if (fragment is SettingsFragment) {
@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
 
         if (existingFragment == null) {
             // Replace fragments not already in fragment manager
-            fragmentTransaction.replace(R.id.nhl_frame_layout, fragment, fragmentTag)
+            fragmentTransaction.replace(R.id.pwhl_frame_layout, fragment, fragmentTag)
 
             // Only add non-home fragments to back stack
             if (selectedItemId != R.id.nav_home) {
