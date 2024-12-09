@@ -20,8 +20,8 @@ import java.util.Locale
 
 private const val TAG = "BoxScoreFragment"
 private const val API_KEY = BuildConfig.API_KEY
-
 private val client = AsyncHttpClient()
+
 class BoxScoreFragment : Fragment(R.layout.fragment_box_score) {
     private lateinit var progressBar: ProgressBar
     private lateinit var finalScoreTextView: TextView
@@ -40,12 +40,12 @@ class BoxScoreFragment : Fragment(R.layout.fragment_box_score) {
 
         // Retrieve the game ID passed via arguments
         gameId = arguments?.getString("GAME_ID") ?: ""
-
         gameId = gameId.replace(":", "%3A")
         val BOXSCORE_SEARCH = "https://api.sportradar.com/icehockey/trial/v2/en/sport_events/${gameId}/summary.json?api_key=${API_KEY}"
 
-        Log.d(TAG, "url = ${BOXSCORE_SEARCH}")
         progressBar = view.findViewById(R.id.progressBar)
+        progressBar.visibility = View.VISIBLE
+
         dateTextView = view.findViewById(R.id.dateTextView)
         finalScoreTextView = view.findViewById(R.id.boxScoreScore)
         periodOneScoreTextView = view.findViewById(R.id.periodOneScore)
@@ -55,9 +55,6 @@ class BoxScoreFragment : Fragment(R.layout.fragment_box_score) {
         shootoutScoreTextView = view.findViewById(R.id.shootoutScore)
         awayTeamLogo = view.findViewById(R.id.awayTeamLogo)
         homeTeamLogo = view.findViewById(R.id.homeTeamLogo)
-
-        progressBar.visibility = View.VISIBLE
-        Log.d(TAG, "fetchGamesFromApi called")
 
         client.get(BOXSCORE_SEARCH, object : JsonHttpResponseHandler() {
             override fun onFailure(
@@ -74,10 +71,7 @@ class BoxScoreFragment : Fragment(R.layout.fragment_box_score) {
             override fun onSuccess(statusCode: Int, headers: Headers?, json: JSON?) {
                 try {
                     if (json != null) {
-                        Log.d(TAG, "json: $json")
                         val jsonObject = json.jsonObject
-                        Log.d(TAG, "jsonObject: $jsonObject")
-
                         val sportEvent = jsonObject.getJSONObject("sport_event")
                         val sportEventStatus = jsonObject.getJSONObject("sport_event_status")
 

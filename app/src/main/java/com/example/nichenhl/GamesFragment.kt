@@ -1,5 +1,6 @@
 package com.example.nichenhl
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -7,9 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.codepath.asynchttpclient.AsyncHttpClient
@@ -25,12 +28,16 @@ import java.util.TimeZone
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.fragment.app.activityViewModels
 
 private const val TAG = "GamesFragment"
 private const val API_KEY = BuildConfig.API_KEY
 private const val GAMES_SEARCH = "https://api.sportradar.com/icehockey/trial/v2/en/seasons/sr%3Aseason%3A122567/summaries.json?api_key=${API_KEY}"
-
 private val client = AsyncHttpClient()
+
+class GamesViewModel : ViewModel() {
+    var currentDate: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+}
 
 class GamesFragment : Fragment() {
     private lateinit var adapter: GameAdapter
@@ -39,7 +46,7 @@ class GamesFragment : Fragment() {
     private lateinit var dateTextView: TextView
     private lateinit var database: AppDatabase
     private var games: MutableList<Game> = mutableListOf()
-    private var currentDate: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    private val viewModel: GamesViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,42 +55,53 @@ class GamesFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_games, container, false)
 
         progressBar = view.findViewById(R.id.progressBar)
-
         recyclerView = view.findViewById(R.id.gamesRecyclerView)
         recyclerView.visibility = View.GONE
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
         adapter = GameAdapter(games, requireActivity().supportFragmentManager)
         recyclerView.adapter = adapter
 
-        fetchGamesFromApi()
-        recyclerView.visibility = View.VISIBLE
-
-        dateTextView = view.findViewById(R.id.dateTextView)
-
-        val nextButton: Button = view.findViewById(R.id.nextDayButton)
-        val prevButton: Button = view.findViewById(R.id.prevDayButton)
-
-        nextButton.setOnClickListener {
-            currentDate = getNextDate(currentDate)
-            dateTextView.text = currentDate
-            updateGamesList(getGamesForDate(games, currentDate))
-        }
-
-        prevButton.setOnClickListener {
-            currentDate = getPreviousDate(currentDate)
-            dateTextView.text = currentDate
-            updateGamesList(getGamesForDate(games, currentDate))
-        }
-
-        dateTextView.text = currentDate
-
         database = AppDatabase.getInstance(requireContext())
 
+        // Use the currentDate from ViewModel
+        dateTextView = view.findViewById(R.id.dateTextView)
+        dateTextView.text = viewModel.currentDate
+
+        fetchGamesFromApi()
+
+        recyclerView.visibility = View.VISIBLE
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val imageView: ImageView = view.findViewById(R.id.titleImage)
+
+        val isDarkMode = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        if (isDarkMode) {
+            imageView.setImageResource(R.drawable.pwhl_logo_transparent_white)
+        } else {
+            imageView.setImageResource(R.drawable.pwhl_logo_transparent_black)
+        }
+
+        val nextButton: Button = view.findViewById(R.id.nextDayButton)
+        nextButton.setOnClickListener {
+            viewModel.currentDate = getNextDate(viewModel.currentDate)
+            dateTextView.text = viewModel.currentDate
+            updateGamesList(getGamesForDate(games, viewModel.currentDate))
+        }
+
+        val prevButton: Button = view.findViewById(R.id.prevDayButton)
+        prevButton.setOnClickListener {
+            viewModel.currentDate = getPreviousDate(viewModel.currentDate)
+            dateTextView.text = viewModel.currentDate
+            updateGamesList(getGamesForDate(games, viewModel.currentDate))
+        }
+    }
+
     private fun fetchGamesFromApi() {
-        Log.d(TAG, "fetchGamesFromApi called")
         progressBar.visibility = View.VISIBLE
 
         client.get(GAMES_SEARCH, object : JsonHttpResponseHandler() {
@@ -173,7 +191,6 @@ class GamesFragment : Fragment() {
                                         val existingGame = database.gameDao().getGameById(id)
                                         if (existingGame == null) {
                                             // If the game does not exist, create and add to the list
-
                                             val gameEntity = GameEntity(
                                                 id = id,
                                                 homeTeam = homeTeam,
@@ -181,11 +198,8 @@ class GamesFragment : Fragment() {
                                                 startTime = startTime
                                             )
 
-                                            // Insert the game into the database
                                             database.gameDao().insert(gameEntity)
                                             Log.d(TAG, "Inserting: ${gameEntity}")
-                                        } else {
-                                            Log.d(TAG, "Game already exists in the database: $id")
                                         }
                                     }
                                 } else {
@@ -196,21 +210,20 @@ class GamesFragment : Fragment() {
                             }
                         }
                     }
-                    updateGamesList(getGamesForDate(this@GamesFragment.games, currentDate))
-                    progressBar.visibility = View.GONE
+                    updateGamesList(getGamesForDate(this@GamesFragment.games, viewModel.currentDate))
                     Log.d(TAG, "Fetched games: ${games.size}")
                 } catch (e: JSONException) {
                     Log.e(TAG, "Failed to parse games: ${e.localizedMessage}")
                 }
+                progressBar.visibility = View.GONE
             }
-
         })
     }
 
     override fun onResume() {
         super.onResume()
         games.clear()
-        updateGamesList(getGamesForDate(this@GamesFragment.games, currentDate))
+        updateGamesList(getGamesForDate(this@GamesFragment.games, viewModel.currentDate))
     }
 
     private fun getGamesForDate(games: List<Game>, selectedDate: String): List<Game> {

@@ -21,7 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 
 private const val TAG = "SettingsFragment"
@@ -70,7 +69,6 @@ class SettingsFragment : Fragment() {
         teamSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedTeamItem = teams[position]
-
                 with(sharedPreferences.edit()) {
                     putString("selectedTeam", selectedTeamItem.name)
                     apply()
@@ -85,8 +83,7 @@ class SettingsFragment : Fragment() {
                 }
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         // Notification switch
@@ -105,7 +102,6 @@ class SettingsFragment : Fragment() {
                 cancelAllScheduledAlarms()
             }
         }
-
         return view
     }
 

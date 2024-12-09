@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/nav_home"
+        android:id="@+id/nav_games"
         android:title="Games"
-        android:icon="@drawable/baseline_sports_hockey_24" />
+        android:icon="@drawable/baseline_sports_hockey_24"/>
     <item
         android:id="@+id/nav_standings"
         android:title="Standings"
-        android:icon="@drawable/baseline_emoji_events_24" />
+        android:icon="@drawable/baseline_emoji_events_24"/>
     <item
         android:id="@+id/nav_settings"
         android:title="Settings"
-        android:icon="@drawable/baseline_settings_24" />
+        android:icon="@drawable/baseline_settings_24"/>
 </menu>
