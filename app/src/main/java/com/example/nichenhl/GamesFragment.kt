@@ -197,13 +197,12 @@ class GamesFragment : Fragment() {
                         }
                     }
                     updateGamesList(getGamesForDate(this@GamesFragment.games, currentDate))
-                    progressBar.visibility = View.GONE
                     Log.d(TAG, "Fetched games: ${games.size}")
                 } catch (e: JSONException) {
                     Log.e(TAG, "Failed to parse games: ${e.localizedMessage}")
                 }
+                progressBar.visibility = View.GONE
             }
-
         })
     }
 
