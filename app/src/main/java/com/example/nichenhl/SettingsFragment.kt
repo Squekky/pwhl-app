@@ -30,6 +30,8 @@ class SettingsFragment : Fragment() {
     private lateinit var notificationSwitch: SwitchCompat
     private lateinit var database: AppDatabase
     private lateinit var sharedPreferences: SharedPreferences
+    private var notificationsScheduled = false
+    private var permissionCheckInProgress = false
     private val teams = listOf(
         Team("None", R.drawable.baseline_sports_hockey_24),
         Team("Boston Fleet", R.drawable.bostonfleet),
@@ -66,43 +68,86 @@ class SettingsFragment : Fragment() {
         }
 
         // Save the selection when a new team is chosen
-        teamSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedTeamItem = teams[position]
-                with(sharedPreferences.edit()) {
-                    putString("selectedTeam", selectedTeamItem.name)
-                    apply()
-                }
+        teamSpinner.post {
+            teamSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val selectedTeamItem = teams[position]
+                    with(sharedPreferences.edit()) {
+                        putString("selectedTeam", selectedTeamItem.name)
+                        apply()
+                    }
 
-                // Cancel scheduled notifications and reschedule for the new selected team
-                cancelAllScheduledAlarms()
-                if (selectedTeamItem.name != "None") {
-                    if (notificationSwitch.isChecked) {
-                        checkAndNotifyForFavoriteTeam(selectedTeamItem.name)
+                    // Cancel scheduled notifications and reschedule for the new selected team
+                    cancelAllScheduledAlarms()
+                    if (selectedTeamItem.name != "None") {
+                        notificationsScheduled = false
+                        if (notificationSwitch.isChecked) {
+                            checkAndNotifyForFavoriteTeam(selectedTeamItem.name)
+                        }
                     }
                 }
-            }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
         }
 
         // Notification switch
         notificationSwitch = view.findViewById(R.id.enableNotificationsSwitch)
         notificationSwitch.isChecked = sharedPreferences.getBoolean("notificationsEnabled", true)
         notificationSwitch.setOnCheckedChangeListener { _, isChecked ->
-            // Save the state of the switch
             sharedPreferences.edit().putBoolean("notificationsEnabled", isChecked).apply()
             if (isChecked) {
-                cancelAllScheduledAlarms()
-                val selectedTeam = sharedPreferences.getString("selectedTeam", "None") ?: "None"
-                if (selectedTeam != "None") {
-                    checkAndNotifyForFavoriteTeam(selectedTeam)
-                }
+                checkAndRequestExactAlarmPermission()
             } else {
                 cancelAllScheduledAlarms()
+                notificationsScheduled = false
+                sharedPreferences.edit().putBoolean("notificationsEnabled", false).apply()
             }
         }
         return view
+    }
+
+    private fun checkAndRequestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = requireContext().getSystemService(AlarmManager::class.java)
+
+            if (!alarmManager.canScheduleExactAlarms()) {
+                // Request the user to grant the permission
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                permissionCheckInProgress = true // Mark permission check as in progress
+                startActivityForResult(intent, NOTIFICATION_PERMISSION_REQUEST_CODE)
+                return
+            }
+        }
+
+        proceedWithNotificationsIfEnabled()
+    }
+
+    private fun proceedWithNotificationsIfEnabled() {
+        val selectedTeam = sharedPreferences.getString("selectedTeam", "None") ?: "None"
+        if (selectedTeam != "None") {
+            checkAndNotifyForFavoriteTeam(selectedTeam)
+        }
+        notificationsScheduled = true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val alarmManager = requireContext().getSystemService(AlarmManager::class.java)
+
+                if (alarmManager.canScheduleExactAlarms()) {
+                    // Permission granted, enable notifications
+                    notificationSwitch.isChecked = true
+                    proceedWithNotificationsIfEnabled()
+                } else {
+                    // Permission denied, reset switch
+                    notificationSwitch.isChecked = false
+                }
+            }
+            permissionCheckInProgress = false // Reset the flag
+        }
     }
 
     private fun cancelAllScheduledAlarms() {
@@ -112,7 +157,6 @@ class SettingsFragment : Fragment() {
 
         for (entry in allPrefs) {
             if (entry.key.startsWith("team_")) {
-                // Extract the game hash code and cancel the associated alarm
                 val gameHashCode = entry.key.substringAfter("team_").toIntOrNull()
                 gameHashCode?.let {
                     val intent = Intent(requireContext(), NotificationReceiver::class.java)
@@ -123,21 +167,29 @@ class SettingsFragment : Fragment() {
                     // Cancel the alarm
                     alarmManager.cancel(pendingIntent)
                     Log.d(TAG, "Cancelled alarm for game with hash code: $gameHashCode")
+
+                    sharedPreferences.edit().remove(entry.key).apply()
                 }
             }
         }
     }
 
     private fun checkAndNotifyForFavoriteTeam(favoriteTeam: String) {
+        // Prevent re-scheduling if notifications are already scheduled
+        if (notificationsScheduled) {
+            Log.d(TAG, "Notifications are already scheduled, skipping re-scheduling.")
+            return
+        }
+
         lifecycleScope.launch(Dispatchers.IO) {
             val gamesForTeam = database.gameDao().getGamesForTeam(favoriteTeam)
-            Log.d(TAG, "gamesForTeam: ${gamesForTeam}")
+            Log.d(TAG, "gamesForTeam: $gamesForTeam")
 
             if (gamesForTeam.isNotEmpty()) {
                 gamesForTeam.forEach { game ->
-                    Log.d(TAG, "Scheduling notification for game: ${game.homeTeam} vs ${game.awayTeam} at ${game.startTime}")
                     scheduleNotificationForGame(game)
                 }
+                notificationsScheduled = true // Mark notifications as scheduled
             } else {
                 Log.d(TAG, "No upcoming games for team: $favoriteTeam")
             }
@@ -161,13 +213,15 @@ class SettingsFragment : Fragment() {
     }
 
     private fun proceedWithNotificationScheduling(game: GameEntity) {
-        val sharedPreferences = requireContext().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
-        val notificationsEnabled = sharedPreferences.getBoolean("notificationsEnabled", true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = requireContext().getSystemService(AlarmManager::class.java)
 
-        if (!notificationsEnabled) {
-            Log.d(TAG, "Notifications are disabled, skipping notification scheduling.")
-            return
+            if (!alarmManager.canScheduleExactAlarms()) {
+                // Permission not granted
+                return
+            }
         }
+        val sharedPreferences = requireContext().getSharedPreferences("scheduled_alarms", Context.MODE_PRIVATE)
 
         // Continue with scheduling if notifications are enabled
         val gameStartTime = game.startTime
@@ -178,7 +232,7 @@ class SettingsFragment : Fragment() {
         if (gameTime != null && gameTime.after(calendar.time)) {
             // Schedule the notification 15 minutes before the game
             calendar.time = gameTime
-            calendar.add(Calendar.MINUTE, -15)
+            calendar.add(Calendar.SECOND, -863900)
 
             val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(requireContext(), NotificationReceiver::class.java).apply {
@@ -194,6 +248,9 @@ class SettingsFragment : Fragment() {
             )
 
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+
+            // Save the alarm to shared preferences
+            sharedPreferences.edit().putInt("team_${gameHashCode}", gameHashCode).apply()
 
             Log.d(TAG, "Scheduled notification for game: ${game.homeTeam} vs ${game.awayTeam} at ${calendar.time}")
         } else {
