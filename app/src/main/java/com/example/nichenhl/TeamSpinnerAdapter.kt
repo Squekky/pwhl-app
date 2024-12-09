@@ -8,10 +8,7 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 
-class TeamSpinnerAdapter(
-    private val context: Context,
-    private val teams: List<Team>
-) : BaseAdapter() {
+class TeamSpinnerAdapter(private val context: Context, private val teams: List<Team>) : BaseAdapter() {
 
     override fun getCount(): Int = teams.size
 

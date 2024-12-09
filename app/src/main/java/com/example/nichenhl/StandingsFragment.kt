@@ -15,7 +15,6 @@ import android.widget.TableRow
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.transition.Visibility
 import com.codepath.asynchttpclient.AsyncHttpClient
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler
 import com.google.android.material.divider.MaterialDivider
@@ -25,7 +24,6 @@ import org.json.JSONException
 private const val TAG = "StandingsFragment"
 private const val API_KEY = BuildConfig.API_KEY
 private const val STANDINGS_SEARCH = "https://api.sportradar.com/icehockey/trial/v2/en/seasons/sr%3Aseason%3A122567/standings.json?api_key=${API_KEY}"
-
 private val client = AsyncHttpClient()
 
 class StandingsFragment : Fragment() {
@@ -55,7 +53,6 @@ class StandingsFragment : Fragment() {
 
     private fun fetchStandings() {
         progressBar.visibility = View.VISIBLE
-        Log.d(TAG, "fetchGamesFromApi called")
 
         client.get(STANDINGS_SEARCH, object : JsonHttpResponseHandler() {
             override fun onFailure(
@@ -119,9 +116,9 @@ class StandingsFragment : Fragment() {
 
                                     linearLayout.addView(logoImageView)
                                     linearLayout.addView(teamNameTextView)
-
                                     linearLayout.gravity = Gravity.START
                                     linearLayout.setPadding(16, 16, 16, 16)
+
                                     tableRow.addView(linearLayout)
                                 } else {
                                     val cellTextView = TextView(requireContext())
@@ -137,7 +134,6 @@ class StandingsFragment : Fragment() {
                             tableLayout.addView(divider)
                         }
                     }
-                    Log.d(TAG, "Fetched standings")
                 } catch (e: JSONException) {
                     Log.e(TAG, "Failed to parse standings: ${e.localizedMessage}")
                 }
@@ -149,19 +145,24 @@ class StandingsFragment : Fragment() {
     private fun fetchHeaderRow() {
         val headerRow = TableRow(requireContext())
         val headers = listOf("", "Team", "PTS", "W", "OTW", "OTL", "L", "GP")
+
         for (header in headers) {
             val headerTextView = TextView(requireContext())
             headerTextView.text = header
             headerTextView.setPadding(16, 16, 16, 16)
+
             if (header == "Team") {
                 headerTextView.gravity = Gravity.START
             } else {
                 headerTextView.gravity = Gravity.CENTER
             }
+
             headerTextView.setTypeface(null, Typeface.BOLD)
             headerTextView.setBackgroundColor(getResources().getColor(R.color.headers))
+            
             headerRow.addView(headerTextView)
         }
+
         tableLayout.addView(headerRow)
         val divider = MaterialDivider(requireContext())
         tableLayout.addView(divider)

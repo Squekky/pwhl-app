@@ -48,7 +48,6 @@ class GameViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         homeTeamLogoImage.setImageResource(getTeamLogoResource(game.homeTeam))
 
         val currentTime = System.currentTimeMillis()
-        Log.d("GameAdapter", "Current time: $currentTime")
 
         // Parse the game start time
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
@@ -59,17 +58,15 @@ class GameViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             0L
         }
 
-        Log.d("GameAdapter", "Game start time (in millis): $gameStartTimeMillis")
-
         if (gameStartTimeMillis > currentTime) {
-            // Show the start time if the game is in the future
+            // Show the start time if the game is in the future, and disable box scores
             gameStartTimeTextView.text = formatTime(game.startTime)
             awayScoreTextView.visibility = View.GONE
             homeScoreTextView.visibility = View.GONE
             gameStartTimeTextView.visibility = View.VISIBLE
-            Log.d("GameAdapter", "Game is in the future, showing start time: ${game.startTime}")
+            itemView.setOnClickListener(null)
         } else {
-            // Show scores if the game is over
+            // Show scores if the game is over, and enable box scores
             awayScoreTextView.visibility = View.VISIBLE
             homeScoreTextView.visibility = View.VISIBLE
 
@@ -81,10 +78,9 @@ class GameViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                 homeScoreTextView.text = Html.fromHtml("<b>${game.homeScore}</b>")
             }
             gameStartTimeTextView.visibility = View.GONE // Hide the start time when the game is over
-            Log.d("GameAdapter", "Game is over, showing scores: Away: ${game.awayScore}, Home: ${game.homeScore}")
-        }
-        itemView.setOnClickListener {
-            openBoxScoreFragment(game, fragmentManager)
+            itemView.setOnClickListener {
+                openBoxScoreFragment(game, fragmentManager)
+            }
         }
     }
 
@@ -114,7 +110,6 @@ class GameViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val date = format.parse(startTime)
         val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
         val formattedTime = timeFormat.format(date)
-        Log.d("GameAdapter", "Formatted start time: $formattedTime")
         return formattedTime
     }
 }
