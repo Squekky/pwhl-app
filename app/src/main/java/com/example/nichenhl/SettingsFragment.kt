@@ -16,6 +16,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -35,7 +36,7 @@ class SettingsFragment : Fragment() {
     private lateinit var database: AppDatabase
     private lateinit var sharedPreferences: SharedPreferences
     private var notificationsScheduled = false
-    private val teams = listOf(
+    private var teams = mutableListOf(
         Team("None", R.drawable.baseline_sports_hockey_24),
         Team("Boston Fleet", R.drawable.bostonfleet),
         Team("Minnesota Frost", R.drawable.minnesotafrost),
@@ -83,6 +84,14 @@ class SettingsFragment : Fragment() {
         // Set up adapter
         val adapter = TeamSpinnerAdapter(requireContext(), teams)
         teamSpinner.adapter = adapter
+
+        // Adjust "None" placeholder for theme
+        val isDarkMode = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        if (isDarkMode) {
+            teams[0].logoResId = R.drawable.pwhl_logo_transparent_white
+        } else {
+            teams[0].logoResId = R.drawable.pwhl_logo_transparent_black
+        }
 
         // Set the spinner's selected value to the saved team
         val position = teams.indexOfFirst { it.name == savedTeamName }

@@ -15,5 +15,5 @@ data class Game(
 
 data class Team(
     val name: String,
-    val logoResId: Int
+    var logoResId: Int
 )
