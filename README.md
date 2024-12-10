@@ -51,11 +51,11 @@ A mobile app that allows users to follow the Professional Women's Hockey League 
   - Displays a page of games on a given day (default is today)
   - User move forward or backward in time and view past or future games
 - Standings Page
-  - User can view the current league standings, with their favorite team highlighted if they chose one
+  - User can view the current league standings
 - Box Score Page
-  - User can view the box score of any completed (or potentially ongoing) game
+  - User can view the box score of any completed
 - Settings
-  - User can select a favorite team to be highlighted in other areas of the app
+  - User can select a favorite team
   - User can enable notifications to be notified when games with their favorite team are about to begin
 
 ### 3. Navigation
@@ -115,11 +115,14 @@ Next sprint:
 
 ## Completed user stories
 
-- Created a box score screen that can be reached through interacting with a completed (or ongoing) game, providing detailed statistics for that game
+- Changed app from Niche NHL to a PWHL app
+- Created a box score screen that can be reached by interacting with a completed game, providing statistics for that game's scoring through each period
 - Used Room to store team data for notifications
   - Decided not to use Room to store user data such as their favorite team, since using SharedPreferences was easier
 - Created an option to enable push notifications for their favorite team
-  - Needs to be fixed in some regards, but it does the job. The Intent to ask for permissions gets stuck on the screen until you restart the app, and it continues to notify you if you open the settings page within the 15 minutes before a game starts
+  - User is prompted for Notification permissions, followed by Alarms & Reminders permissions
+  - Once both are granted, if the user has selected a favorite team, they will be notified 15 minutes before the start of every game of that team
+  - Notifications can be completely disabled in the app
 - <img src='https://github.com/Squekky/niche-nhl/blob/main/docs/milestone3/milestone3Walkthrough.gif' title='Milestone 3 Walkthrough' width='' alt='Video Walkthrough' />
 
 ## App Demo Video
