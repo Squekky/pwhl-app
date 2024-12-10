@@ -1,5 +1,6 @@
 package com.example.nichenhl
 
+import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -14,8 +15,12 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,14 +29,12 @@ import java.util.Calendar
 import java.util.Locale
 
 private const val TAG = "SettingsFragment"
-private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1001
 
 class SettingsFragment : Fragment() {
     private lateinit var notificationSwitch: SwitchCompat
     private lateinit var database: AppDatabase
     private lateinit var sharedPreferences: SharedPreferences
     private var notificationsScheduled = false
-    private var permissionCheckInProgress = false
     private val teams = listOf(
         Team("None", R.drawable.baseline_sports_hockey_24),
         Team("Boston Fleet", R.drawable.bostonfleet),
@@ -41,6 +44,25 @@ class SettingsFragment : Fragment() {
         Team("Ottawa Charge", R.drawable.ottawacharge),
         Team("Toronto Sceptres", R.drawable.torontosceptres)
     )
+
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+        if (isGranted) {
+            Log.d(TAG, "Notification permission granted.")
+            checkAndRequestExactAlarmPermission(false) // Request alarm permission right after notification permission is granted
+        } else {
+            Log.d(TAG, "Notification permission denied.")
+            Toast.makeText(context, "Notification permission denied. Check your device settings.", Toast.LENGTH_SHORT).show()
+            notificationSwitch.isChecked = false // Reset the switch if denied
+        }
+    }
+
+    private val requestExactAlarmPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        notificationSwitch.isChecked = false
+        if (result.resultCode == Activity.RESULT_CANCELED) {
+            // Check if they enabled alarms again
+            checkAndRequestExactAlarmPermission(true)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,7 +74,8 @@ class SettingsFragment : Fragment() {
 
         // Spinner
         val teamSpinner: Spinner = view.findViewById(R.id.selectTeamSpinner)
-        sharedPreferences = requireContext().getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        sharedPreferences =
+            requireContext().getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
         // Get the saved team name or default to the first team (None)
         val savedTeamName = sharedPreferences.getString("selectedTeam", teams[0].name)
@@ -70,14 +93,19 @@ class SettingsFragment : Fragment() {
         // Save the selection when a new team is chosen
         teamSpinner.post {
             teamSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
                     val selectedTeamItem = teams[position]
                     with(sharedPreferences.edit()) {
                         putString("selectedTeam", selectedTeamItem.name)
                         apply()
                     }
 
-                    // Cancel scheduled notifications and reschedule for the new selected team
+                    // Cancel scheduled notifications and reschedule for new team
                     cancelAllScheduledAlarms()
                     if (selectedTeamItem.name != "None") {
                         notificationsScheduled = false
@@ -93,12 +121,12 @@ class SettingsFragment : Fragment() {
 
         // Notification switch
         notificationSwitch = view.findViewById(R.id.enableNotificationsSwitch)
-        notificationSwitch.isChecked = sharedPreferences.getBoolean("notificationsEnabled", true)
+        notificationSwitch.isChecked = sharedPreferences.getBoolean("notificationsEnabled", false)
         notificationSwitch.setOnCheckedChangeListener { _, isChecked ->
             sharedPreferences.edit().putBoolean("notificationsEnabled", isChecked).apply()
             if (isChecked) {
-                checkAndRequestExactAlarmPermission()
-            } else {
+                checkAndRequestPermissions()
+            } else {  // Cancel alarms when notifications are disabled
                 cancelAllScheduledAlarms()
                 notificationsScheduled = false
                 sharedPreferences.edit().putBoolean("notificationsEnabled", false).apply()
@@ -107,47 +135,36 @@ class SettingsFragment : Fragment() {
         return view
     }
 
-    private fun checkAndRequestExactAlarmPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val alarmManager = requireContext().getSystemService(AlarmManager::class.java)
-
-            if (!alarmManager.canScheduleExactAlarms()) {
-                // Request the user to grant the permission
-                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                permissionCheckInProgress = true // Mark permission check as in progress
-                startActivityForResult(intent, NOTIFICATION_PERMISSION_REQUEST_CODE)
+    private fun checkAndRequestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val notificationPermission = "android.permission.POST_NOTIFICATIONS"
+            if (ContextCompat.checkSelfPermission(requireContext(), notificationPermission) != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Requesting notification permissions")
+                requestPermissionLauncher.launch(notificationPermission)
                 return
             }
         }
-
-        proceedWithNotificationsIfEnabled()
+        Log.d(TAG, "Notification permission granted or not required")
+        checkAndRequestExactAlarmPermission(false)
     }
 
-    private fun proceedWithNotificationsIfEnabled() {
+    private fun checkAndRequestExactAlarmPermission(alreadyChecked: Boolean) {
+        val alarmManager = requireContext().getSystemService(AlarmManager::class.java)
+        if (!alarmManager.canScheduleExactAlarms()) {
+            if (alreadyChecked) return // Prevent users from an infinite loop
+            Log.d(TAG, "Requesting exact alarm permissions")
+            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+            requestExactAlarmPermissionLauncher.launch(intent)
+            return
+        }
+
+        Log.d(TAG, "Exact alarm permission granted or not required")
         val selectedTeam = sharedPreferences.getString("selectedTeam", "None") ?: "None"
+        notificationSwitch.isChecked = true
         if (selectedTeam != "None") {
             checkAndNotifyForFavoriteTeam(selectedTeam)
         }
         notificationsScheduled = true
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val alarmManager = requireContext().getSystemService(AlarmManager::class.java)
-
-                if (alarmManager.canScheduleExactAlarms()) {
-                    // Permission granted, enable notifications
-                    notificationSwitch.isChecked = true
-                    proceedWithNotificationsIfEnabled()
-                } else {
-                    // Permission denied, reset switch
-                    notificationSwitch.isChecked = false
-                }
-            }
-            permissionCheckInProgress = false // Reset the flag
-        }
     }
 
     private fun cancelAllScheduledAlarms() {
@@ -166,9 +183,8 @@ class SettingsFragment : Fragment() {
 
                     // Cancel the alarm
                     alarmManager.cancel(pendingIntent)
-                    Log.d(TAG, "Cancelled alarm for game with hash code: $gameHashCode")
-
                     sharedPreferences.edit().remove(entry.key).apply()
+                    Log.d(TAG, "Cancelled alarm for game with hash code: $gameHashCode")
                 }
             }
         }
@@ -183,47 +199,21 @@ class SettingsFragment : Fragment() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             val gamesForTeam = database.gameDao().getGamesForTeam(favoriteTeam)
-            Log.d(TAG, "gamesForTeam: $gamesForTeam")
 
             if (gamesForTeam.isNotEmpty()) {
                 gamesForTeam.forEach { game ->
-                    scheduleNotificationForGame(game)
+                    scheduleNotification(game)
                 }
-                notificationsScheduled = true // Mark notifications as scheduled
+                notificationsScheduled = true
             } else {
                 Log.d(TAG, "No upcoming games for team: $favoriteTeam")
             }
         }
     }
 
-    private fun scheduleNotificationForGame(game: GameEntity) {
-        // Check if notifications are enabled and if exact alarm permission is granted
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val alarmManager = requireContext().getSystemService(AlarmManager::class.java)
-
-            // Check if the app has permission to schedule exact alarms
-            if (!alarmManager.canScheduleExactAlarms()) {
-                // Request the user to grant the permission
-                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                startActivityForResult(intent, NOTIFICATION_PERMISSION_REQUEST_CODE)
-                return
-            }
-        }
-        proceedWithNotificationScheduling(game)
-    }
-
-    private fun proceedWithNotificationScheduling(game: GameEntity) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val alarmManager = requireContext().getSystemService(AlarmManager::class.java)
-
-            if (!alarmManager.canScheduleExactAlarms()) {
-                // Permission not granted
-                return
-            }
-        }
+    private fun scheduleNotification(game: GameEntity) {
         val sharedPreferences = requireContext().getSharedPreferences("scheduled_alarms", Context.MODE_PRIVATE)
 
-        // Continue with scheduling if notifications are enabled
         val gameStartTime = game.startTime
         val calendar = Calendar.getInstance()
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
@@ -232,7 +222,7 @@ class SettingsFragment : Fragment() {
         if (gameTime != null && gameTime.after(calendar.time)) {
             // Schedule the notification 15 minutes before the game
             calendar.time = gameTime
-            calendar.add(Calendar.SECOND, -863900)
+            calendar.add(Calendar.MINUTE, -15)
 
             val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(requireContext(), NotificationReceiver::class.java).apply {
