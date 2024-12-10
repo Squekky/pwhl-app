@@ -101,7 +101,8 @@ Next sprint:
 - Created 3 screens: Home, Settings, Stats
   - Home, Settings can be navigated to using the bottom navigation menu
   - Stats can be navigated to by selecting a statistic from the search menu on the Home screen
-- <img src='https://github.com/Squekky/niche-nhl/blob/main/docs/milestone2/milestone2Walkthrough.gif' title='Milestone 3 Walkthrough' width='' alt='Video Walkthrough' />
+
+<img src='https://github.com/Squekky/niche-nhl/blob/main/docs/milestone2/milestone2Walkthrough.gif' title='Milestone 3 Walkthrough' width='' alt='Video Walkthrough' />
 
 <br>
 
@@ -123,8 +124,12 @@ Next sprint:
   - User is prompted for Notification permissions, followed by Alarms & Reminders permissions
   - Once both are granted, if the user has selected a favorite team, they will be notified 15 minutes before the start of every game of that team
   - Notifications can be completely disabled in the app
-- <img src='https://github.com/Squekky/niche-nhl/blob/main/docs/milestone3/milestone3Walkthrough.gif' title='Milestone 3 Walkthrough' width='' alt='Video Walkthrough' />
+
+<img src='https://github.com/Squekky/niche-nhl/blob/main/docs/milestone3/milestone3Walkthrough.gif' title='Milestone 3 Walkthrough' width='' alt='Video Walkthrough' />
 
 ## App Demo Video
 
-- Embed the YouTube/Vimeo link of your Completed Demo Day prep video
+<a href="https://www.youtube.com/watch?v=S1eFprAtZZY">
+    Watch:
+    <img src="https://img.youtube.com/vi/S1eFprAtZZY/0.jpg" style="width:100%;">
+</a>
