@@ -126,10 +126,3 @@ Next sprint:
   - Notifications can be completely disabled in the app
 
 <img src='https://github.com/Squekky/niche-nhl/blob/main/docs/milestone3/milestone3Walkthrough.gif' title='Milestone 3 Walkthrough' width='' alt='Video Walkthrough' />
-
-## App Demo Video
-
-<a href="https://www.youtube.com/watch?v=S1eFprAtZZY">
-    Watch:
-    <img src="https://img.youtube.com/vi/S1eFprAtZZY/0.jpg" style="width:100%;">
-</a>
